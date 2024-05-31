@@ -174,20 +174,20 @@ const Home: React.FC = () => {
                   <span>{expandedSets[set] ? "-" : "+"}</span>
                 </div>
                 {expandedSets[set] && (
-                  <ul className="ml-4 list-none">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mt-4">
                     {cards.map((card, index) => (
-                      <li key={index} className="ml-4">
+                      <div key={index} className="text-center">
                         {card.imageUrl && (
                           <img
                             src={card.imageUrl}
                             alt={card.name}
-                            className="w-64 h-auto mb-2"
+                            className="w-full h-auto mb-2"
                           />
                         )}
-                        {card.name}
-                      </li>
+                        <p>{card.name}</p>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 )}
               </li>
             ))}
