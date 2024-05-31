@@ -24,6 +24,15 @@ jobs:
       - name: Setup Node.js ⚙️ - Cache dependencies ⚡ - Install dependencies 🔧
         uses: ./.github/workflows/setup-node
 
+      - name: Print Node.js Version
+        run: node -v
+
+      - name: Print Next.js Version
+        run: npx next --version
+
+      - name: Print Next.js Config
+        run: cat next.config.mjs
+
       - name: Setup Pages ⚙️
         uses: actions/configure-pages@v4
         with:
