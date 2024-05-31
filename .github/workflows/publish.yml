@@ -2,7 +2,7 @@ name: publish-to-github-pages
 on:
   push:
     branches:
-      - main
+      - master
 
 permissions:
   contents: read
@@ -24,39 +24,13 @@ jobs:
       - name: Setup Node.js ⚙️ - Cache dependencies ⚡ - Install dependencies 🔧
         uses: ./.github/workflows/setup-node
 
-      - name: Print Node.js Version
-        run: node -v
-
-      - name: Print Next.js Version
-        run: npx next --version
-
-      - name: Print Next.js Config
-        run: cat next.config.mjs
-
       - name: Setup Pages ⚙️
         uses: actions/configure-pages@v4
         with:
           static_site_generator: next
 
       - name: Build with Next.js 🏗️
-        run: |
-          echo "Running next build"
-          npx next build
-
-      - name: List Root Directory
-        run: |
-          echo "Listing root directory"
-          ls -la
-
-      - name: List .next Directory
-        run: |
-          echo "Listing .next directory"
-          ls -la .next
-
-      - name: Verify Output Directory
-        run: |
-          echo "Verifying ./out directory"
-          ls -la ./out || echo "Directory ./out does not exist"
+        run: npx next build
 
       - name: Upload artifact 📡
         uses: actions/upload-pages-artifact@v3
