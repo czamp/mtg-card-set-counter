@@ -16,6 +16,22 @@ interface PrintData {
   };
 }
 
+interface CardInfo {
+  name: string;
+  imageUrl: string;
+}
+
+interface SetInfo {
+  count: number;
+  set_name: string;
+  cards: CardInfo[];
+}
+
+interface ExclusiveCardInfo {
+  set_name: string;
+  cards: CardInfo[];
+}
+
 const fetchCardData = async (cardName: string): Promise<CardData | null> => {
   const url = `https://api.scryfall.com/cards/named?exact=${encodeURIComponent(
     cardName
@@ -55,27 +71,10 @@ const basicLands = ["Forest", "Island", "Mountain", "Plains", "Swamp"];
 const countCardsInSets = async (
   cardList: string
 ): Promise<{
-  setCount: Record<
-    string,
-    {
-      count: number;
-      set_name: string;
-      cards: { name: string; imageUrl: string }[];
-    }
-  >;
-  exclusiveCards: Record<
-    string,
-    { set: string; set_name: string; imageUrl: string }
-  >;
+  setCount: Record<string, SetInfo>;
+  exclusiveCards: Record<string, ExclusiveCardInfo>;
 }> => {
-  const setCount: Record<
-    string,
-    {
-      count: number;
-      set_name: string;
-      cards: { name: string; imageUrl: string }[];
-    }
-  > = {};
+  const setCount: Record<string, SetInfo> = {};
   const cardAppearance: Record<string, Set<string>> = {};
   const cardToSet: Record<
     string,
@@ -126,31 +125,22 @@ const countCardsInSets = async (
       }
       acc[set].cards.push({ name: cardName, imageUrl });
       return acc;
-    }, {} as Record<string, { set_name: string; cards: { name: string; imageUrl: string }[] }>);
+    }, {} as Record<string, ExclusiveCardInfo>);
 
   return { setCount, exclusiveCards };
 };
 
 const Home: React.FC = () => {
   const [cardList, setCardList] = useState("");
-  const [setCounts, setSetCounts] = useState<
-    Record<
-      string,
-      {
-        count: number;
-        set_name: string;
-        cards: { name: string; imageUrl: string }[];
-      }
-    >
-  >({});
+  const [setCounts, setSetCounts] = useState<Record<string, SetInfo>>({});
   const [exclusiveCards, setExclusiveCards] = useState<
-    Record<
-      string,
-      { set_name: string; cards: { name: string; imageUrl: string }[] }
-    >
+    Record<string, ExclusiveCardInfo>
   >({});
   const [loading, setLoading] = useState(false); // Add loading state
   const [expandedSets, setExpandedSets] = useState<Record<string, boolean>>({}); // Track expanded sets
+  const [expandedExclusiveSets, setExpandedExclusiveSets] = useState<
+    Record<string, boolean>
+  >({}); // Track expanded exclusive sets
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -165,6 +155,13 @@ const Home: React.FC = () => {
     setExpandedSets((prevExpandedSets) => ({
       ...prevExpandedSets,
       [set]: !prevExpandedSets[set],
+    }));
+  };
+
+  const toggleExclusiveSet = (set: string) => {
+    setExpandedExclusiveSets((prevExpandedExclusiveSets) => ({
+      ...prevExpandedExclusiveSets,
+      [set]: !prevExpandedExclusiveSets[set],
     }));
   };
 
@@ -202,27 +199,35 @@ const Home: React.FC = () => {
               {Object.entries(exclusiveCards).map(
                 ([set, { set_name, cards }], index) => (
                   <div key={index} className="mb-4">
-                    <h3 className="text-lg font-semibold">{set_name}</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mt-4">
-                      {cards.map((card, idx) => (
-                        <div key={idx} className="text-center">
-                          {card.imageUrl && (
-                            <img
-                              src={card.imageUrl}
-                              alt={card.name}
-                              className="w-full h-auto mb-2"
-                            />
-                          )}
-                          <p>{card.name}</p>
-                        </div>
-                      ))}
+                    <div
+                      className="flex justify-between cursor-pointer bg-gray-500 p-2 rounded"
+                      onClick={() => toggleExclusiveSet(set)}
+                    >
+                      <span>{set_name}</span>
+                      <span>{expandedExclusiveSets[set] ? "-" : "+"}</span>
                     </div>
+                    {expandedExclusiveSets[set] && (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mt-4">
+                        {cards.map((card, idx) => (
+                          <div key={idx} className="text-center">
+                            {card.imageUrl && (
+                              <img
+                                src={card.imageUrl}
+                                alt={card.name}
+                                className="w-full h-auto mb-2"
+                              />
+                            )}
+                            <p>{card.name}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )
               )}
             </>
           )}
-          <h2 className="text-xl font-semibold">Set Counts:</h2>
+          <h2 className="text-xl font-semibold mt-8">Set Counts</h2>
           <ul className="list-none">
             {sortedSetCounts.map(([set, { count, set_name, cards }]) => (
               <li key={set} className="mb-2">
@@ -236,7 +241,7 @@ const Home: React.FC = () => {
                   <span>{expandedSets[set] ? "-" : "+"}</span>
                 </div>
                 {expandedSets[set] && (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mt-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-4">
                     {cards.map((card, index) => (
                       <div key={index} className="text-center">
                         {card.imageUrl && (
