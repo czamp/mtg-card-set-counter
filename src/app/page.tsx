@@ -1,113 +1,167 @@
-import Image from "next/image";
+"use client";
+import React, { useState } from "react";
+import axios from "axios";
 
-export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  );
+interface CardData {
+  name: string;
+  prints_search_uri: string;
 }
+
+interface PrintData {
+  set: string;
+  set_name: string;
+}
+
+const fetchCardData = async (cardName: string): Promise<CardData | null> => {
+  const url = `https://api.scryfall.com/cards/named?exact=${encodeURIComponent(
+    cardName
+  )}`;
+  try {
+    const response = await axios.get(url);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching data for card: ${cardName}`, error);
+    return null;
+  }
+};
+
+const getCardSets = async (cardData: CardData): Promise<PrintData[]> => {
+  const sets: PrintData[] = [];
+  if (cardData && cardData.prints_search_uri) {
+    const url = cardData.prints_search_uri;
+    try {
+      const response = await axios.get(url);
+      const prints = response.data;
+      prints.data.forEach((printData: any) => {
+        sets.push({
+          set: printData.set,
+          set_name: printData.set_name,
+        });
+      });
+    } catch (error) {
+      console.error(`Error fetching prints for card: ${cardData.name}`, error);
+    }
+  }
+  return sets;
+};
+
+const basicLands = ["Forest", "Island", "Mountain", "Plains", "Swamp"];
+
+const countCardsInSets = async (
+  cardList: string
+): Promise<
+  Record<string, { count: number; set_name: string; cards: string[] }>
+> => {
+  const setCount: Record<
+    string,
+    { count: number; set_name: string; cards: string[] }
+  > = {};
+  const cardLines = cardList
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line);
+  for (const line of cardLines) {
+    const cardName = line.replace(/^\d+\s+/, ""); // Remove the quantity and space
+    if (basicLands.includes(cardName)) continue; // Skip basic lands
+
+    const cardData = await fetchCardData(cardName);
+    if (cardData) {
+      const sets = await getCardSets(cardData);
+      sets.forEach(({ set, set_name }) => {
+        if (setCount[set]) {
+          if (!setCount[set].cards.includes(cardName)) {
+            setCount[set].count++;
+            setCount[set].cards.push(cardName);
+          }
+        } else {
+          setCount[set] = { count: 1, set_name, cards: [cardName] };
+        }
+      });
+    }
+  }
+  return setCount;
+};
+
+const Home: React.FC = () => {
+  const [cardList, setCardList] = useState("");
+  const [setCounts, setSetCounts] = useState<
+    Record<string, { count: number; set_name: string; cards: string[] }>
+  >({});
+  const [loading, setLoading] = useState(false); // Add loading state
+  const [expandedSets, setExpandedSets] = useState<Record<string, boolean>>({}); // Track expanded sets
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setLoading(true); // Set loading to true at the start
+    const counts = await countCardsInSets(cardList);
+    setSetCounts(counts);
+    setLoading(false); // Set loading to false at the end
+  };
+
+  const toggleSet = (set: string) => {
+    setExpandedSets((prevExpandedSets) => ({
+      ...prevExpandedSets,
+      [set]: !prevExpandedSets[set],
+    }));
+  };
+
+  const sortedSetCounts = Object.entries(setCounts).sort(
+    (a, b) => b[1].count - a[1].count
+  );
+
+  return (
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">MTG Card Set Counter</h1>
+      <form onSubmit={handleSubmit} className="mb-4">
+        <textarea
+          rows={10}
+          cols={50}
+          value={cardList}
+          onChange={(e) => setCardList(e.target.value)}
+          placeholder="Paste your list of card names here, one per line."
+          className="w-full p-2 border border-gray-300 rounded text-black"
+        ></textarea>
+        <br />
+        <button
+          type="submit"
+          className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
+        >
+          Count Cards in Sets
+        </button>
+      </form>
+      {loading ? (
+        <p>Loading...</p> // Conditionally render loading message
+      ) : (
+        <>
+          <h2 className="text-xl font-semibold">Set Counts:</h2>
+          <ul className="list-none">
+            {sortedSetCounts.map(([set, { count, set_name, cards }]) => (
+              <li key={set} className="mb-2">
+                <div
+                  className="flex justify-between cursor-pointer bg-gray-500 p-2 rounded"
+                  onClick={() => toggleSet(set)}
+                >
+                  <span>
+                    {set_name} ({set}): {count}
+                  </span>
+                  <span>{expandedSets[set] ? "-" : "+"}</span>
+                </div>
+                {expandedSets[set] && (
+                  <ul className="ml-4 list-none">
+                    {cards.map((cardName, index) => (
+                      <li key={index} className="ml-4">
+                        {cardName}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </div>
+  );
+};
+
+export default Home;
