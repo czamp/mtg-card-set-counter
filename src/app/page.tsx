@@ -10,6 +10,10 @@ interface CardData {
 interface PrintData {
   set: string;
   set_name: string;
+  image_uris?: {
+    normal?: string;
+    large?: string;
+  };
 }
 
 const fetchCardData = async (cardName: string): Promise<CardData | null> => {
@@ -36,6 +40,7 @@ const getCardSets = async (cardData: CardData): Promise<PrintData[]> => {
         sets.push({
           set: printData.set,
           set_name: printData.set_name,
+          image_uris: printData.image_uris,
         });
       });
     } catch (error) {
@@ -50,11 +55,22 @@ const basicLands = ["Forest", "Island", "Mountain", "Plains", "Swamp"];
 const countCardsInSets = async (
   cardList: string
 ): Promise<
-  Record<string, { count: number; set_name: string; cards: string[] }>
+  Record<
+    string,
+    {
+      count: number;
+      set_name: string;
+      cards: { name: string; imageUrl: string }[];
+    }
+  >
 > => {
   const setCount: Record<
     string,
-    { count: number; set_name: string; cards: string[] }
+    {
+      count: number;
+      set_name: string;
+      cards: { name: string; imageUrl: string }[];
+    }
   > = {};
   const cardLines = cardList
     .split("\n")
@@ -67,14 +83,18 @@ const countCardsInSets = async (
     const cardData = await fetchCardData(cardName);
     if (cardData) {
       const sets = await getCardSets(cardData);
-      sets.forEach(({ set, set_name }) => {
+      sets.forEach(({ set, set_name, image_uris }) => {
+        const cardInfo = {
+          name: cardName,
+          imageUrl: image_uris?.normal || image_uris?.large || "",
+        };
         if (setCount[set]) {
-          if (!setCount[set].cards.includes(cardName)) {
+          if (!setCount[set].cards.find((card) => card.name === cardName)) {
             setCount[set].count++;
-            setCount[set].cards.push(cardName);
+            setCount[set].cards.push(cardInfo);
           }
         } else {
-          setCount[set] = { count: 1, set_name, cards: [cardName] };
+          setCount[set] = { count: 1, set_name, cards: [cardInfo] };
         }
       });
     }
@@ -85,7 +105,14 @@ const countCardsInSets = async (
 const Home: React.FC = () => {
   const [cardList, setCardList] = useState("");
   const [setCounts, setSetCounts] = useState<
-    Record<string, { count: number; set_name: string; cards: string[] }>
+    Record<
+      string,
+      {
+        count: number;
+        set_name: string;
+        cards: { name: string; imageUrl: string }[];
+      }
+    >
   >({});
   const [loading, setLoading] = useState(false); // Add loading state
   const [expandedSets, setExpandedSets] = useState<Record<string, boolean>>({}); // Track expanded sets
@@ -148,9 +175,16 @@ const Home: React.FC = () => {
                 </div>
                 {expandedSets[set] && (
                   <ul className="ml-4 list-none">
-                    {cards.map((cardName, index) => (
+                    {cards.map((card, index) => (
                       <li key={index} className="ml-4">
-                        {cardName}
+                        {card.imageUrl && (
+                          <img
+                            src={card.imageUrl}
+                            alt={card.name}
+                            className="w-64 h-auto mb-2"
+                          />
+                        )}
+                        {card.name}
                       </li>
                     ))}
                   </ul>
