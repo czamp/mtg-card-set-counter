@@ -76,7 +76,7 @@ const countCardsInSets = async (
       cards: { name: string; imageUrl: string }[];
     }
   > = {};
-  const cardAppearance: Record<string, number> = {};
+  const cardAppearance: Record<string, Set<string>> = {};
   const cardToSet: Record<
     string,
     { set: string; set_name: string; imageUrl: string }
@@ -94,7 +94,6 @@ const countCardsInSets = async (
     if (cardData) {
       const sets = await getCardSets(cardData);
       sets.forEach(({ set, set_name, image_uris }) => {
-        // if (set === "pcel" || set === "prm") return; // Skip promos (e.g. Buy-a-Box promos
         const cardInfo = {
           name: cardName,
           imageUrl: image_uris?.normal || image_uris?.large || "",
@@ -109,18 +108,25 @@ const countCardsInSets = async (
           setCount[set] = { count: 1, set_name, cards: [cardInfo] };
         }
 
-        cardAppearance[cardName] = (cardAppearance[cardName] || 0) + 1;
+        if (!cardAppearance[cardName]) {
+          cardAppearance[cardName] = new Set();
+        }
+        cardAppearance[cardName].add(set);
         cardToSet[cardName] = { set, set_name, imageUrl: cardInfo.imageUrl };
       });
     }
   }
 
   const exclusiveCards = Object.entries(cardAppearance)
-    .filter(([_, count]) => count === 1)
+    .filter(([_, sets]) => sets.size === 1)
     .reduce((acc, [cardName]) => {
-      acc[cardName] = cardToSet[cardName];
+      const { set, set_name, imageUrl } = cardToSet[cardName];
+      if (!acc[set]) {
+        acc[set] = { set_name, cards: [] };
+      }
+      acc[set].cards.push({ name: cardName, imageUrl });
       return acc;
-    }, {} as Record<string, { set: string; set_name: string; imageUrl: string }>);
+    }, {} as Record<string, { set_name: string; cards: { name: string; imageUrl: string }[] }>);
 
   return { setCount, exclusiveCards };
 };
@@ -138,7 +144,10 @@ const Home: React.FC = () => {
     >
   >({});
   const [exclusiveCards, setExclusiveCards] = useState<
-    Record<string, { set: string; set_name: string; imageUrl: string }>
+    Record<
+      string,
+      { set_name: string; cards: { name: string; imageUrl: string }[] }
+    >
   >({});
   const [loading, setLoading] = useState(false); // Add loading state
   const [expandedSets, setExpandedSets] = useState<Record<string, boolean>>({}); // Track expanded sets
@@ -190,23 +199,27 @@ const Home: React.FC = () => {
           {Object.keys(exclusiveCards).length > 0 && (
             <>
               <h2 className="text-xl font-semibold mt-8">Exclusive Cards</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mt-4">
-                {Object.entries(exclusiveCards).map(
-                  ([cardName, { set_name, imageUrl }], index) => (
-                    <div key={index} className="text-center">
-                      {imageUrl && (
-                        <img
-                          src={imageUrl}
-                          alt={cardName}
-                          className="w-full h-auto mb-2"
-                        />
-                      )}
-                      <p>{cardName}</p>
-                      <p className="text-sm text-gray-500">{set_name}</p>
+              {Object.entries(exclusiveCards).map(
+                ([set, { set_name, cards }], index) => (
+                  <div key={index} className="mb-4">
+                    <h3 className="text-lg font-semibold">{set_name}</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mt-4">
+                      {cards.map((card, idx) => (
+                        <div key={idx} className="text-center">
+                          {card.imageUrl && (
+                            <img
+                              src={card.imageUrl}
+                              alt={card.name}
+                              className="w-full h-auto mb-2"
+                            />
+                          )}
+                          <p>{card.name}</p>
+                        </div>
+                      ))}
                     </div>
-                  )
-                )}
-              </div>
+                  </div>
+                )
+              )}
             </>
           )}
           <h2 className="text-xl font-semibold">Set Counts:</h2>
