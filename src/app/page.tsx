@@ -54,16 +54,20 @@ const basicLands = ["Forest", "Island", "Mountain", "Plains", "Swamp"];
 
 const countCardsInSets = async (
   cardList: string
-): Promise<
-  Record<
+): Promise<{
+  setCount: Record<
     string,
     {
       count: number;
       set_name: string;
       cards: { name: string; imageUrl: string }[];
     }
-  >
-> => {
+  >;
+  exclusiveCards: Record<
+    string,
+    { set: string; set_name: string; imageUrl: string }
+  >;
+}> => {
   const setCount: Record<
     string,
     {
@@ -72,10 +76,16 @@ const countCardsInSets = async (
       cards: { name: string; imageUrl: string }[];
     }
   > = {};
+  const cardAppearance: Record<string, number> = {};
+  const cardToSet: Record<
+    string,
+    { set: string; set_name: string; imageUrl: string }
+  > = {};
   const cardLines = cardList
     .split("\n")
     .map((line) => line.trim())
     .filter((line) => line);
+
   for (const line of cardLines) {
     const cardName = line.replace(/^\d+\s+/, ""); // Remove the quantity and space
     if (basicLands.includes(cardName)) continue; // Skip basic lands
@@ -84,10 +94,12 @@ const countCardsInSets = async (
     if (cardData) {
       const sets = await getCardSets(cardData);
       sets.forEach(({ set, set_name, image_uris }) => {
+        // if (set === "pcel" || set === "prm") return; // Skip promos (e.g. Buy-a-Box promos
         const cardInfo = {
           name: cardName,
           imageUrl: image_uris?.normal || image_uris?.large || "",
         };
+
         if (setCount[set]) {
           if (!setCount[set].cards.find((card) => card.name === cardName)) {
             setCount[set].count++;
@@ -96,10 +108,21 @@ const countCardsInSets = async (
         } else {
           setCount[set] = { count: 1, set_name, cards: [cardInfo] };
         }
+
+        cardAppearance[cardName] = (cardAppearance[cardName] || 0) + 1;
+        cardToSet[cardName] = { set, set_name, imageUrl: cardInfo.imageUrl };
       });
     }
   }
-  return setCount;
+
+  const exclusiveCards = Object.entries(cardAppearance)
+    .filter(([_, count]) => count === 1)
+    .reduce((acc, [cardName]) => {
+      acc[cardName] = cardToSet[cardName];
+      return acc;
+    }, {} as Record<string, { set: string; set_name: string; imageUrl: string }>);
+
+  return { setCount, exclusiveCards };
 };
 
 const Home: React.FC = () => {
@@ -114,14 +137,18 @@ const Home: React.FC = () => {
       }
     >
   >({});
+  const [exclusiveCards, setExclusiveCards] = useState<
+    Record<string, { set: string; set_name: string; imageUrl: string }>
+  >({});
   const [loading, setLoading] = useState(false); // Add loading state
   const [expandedSets, setExpandedSets] = useState<Record<string, boolean>>({}); // Track expanded sets
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoading(true); // Set loading to true at the start
-    const counts = await countCardsInSets(cardList);
-    setSetCounts(counts);
+    const { setCount, exclusiveCards } = await countCardsInSets(cardList);
+    setSetCounts(setCount);
+    setExclusiveCards(exclusiveCards);
     setLoading(false); // Set loading to false at the end
   };
 
@@ -160,6 +187,28 @@ const Home: React.FC = () => {
         <p>Loading...</p> // Conditionally render loading message
       ) : (
         <>
+          {Object.keys(exclusiveCards).length > 0 && (
+            <>
+              <h2 className="text-xl font-semibold mt-8">Exclusive Cards</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mt-4">
+                {Object.entries(exclusiveCards).map(
+                  ([cardName, { set_name, imageUrl }], index) => (
+                    <div key={index} className="text-center">
+                      {imageUrl && (
+                        <img
+                          src={imageUrl}
+                          alt={cardName}
+                          className="w-full h-auto mb-2"
+                        />
+                      )}
+                      <p>{cardName}</p>
+                      <p className="text-sm text-gray-500">{set_name}</p>
+                    </div>
+                  )
+                )}
+              </div>
+            </>
+          )}
           <h2 className="text-xl font-semibold">Set Counts:</h2>
           <ul className="list-none">
             {sortedSetCounts.map(([set, { count, set_name, cards }]) => (
