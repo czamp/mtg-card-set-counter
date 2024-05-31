@@ -2,7 +2,7 @@
 const nextConfig = {
   output: "export",
   reactStrictMode: true,
-  basePath: "/mtg-card-set-counter",
+  basePath: "mtg-card-set-counter",
 };
 
-module.exports = nextConfig;
+export default nextConfig;
