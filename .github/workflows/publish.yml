@@ -30,19 +30,24 @@ jobs:
           static_site_generator: next
 
       - name: Build with Next.js 🏗️
-        run: npx next build
-
-      - name: Export with Next.js 📦
-        run: npx next export
+        run: |
+          echo "Running next build"
+          npx next build
 
       - name: List Root Directory
-        run: ls -la
+        run: |
+          echo "Listing root directory"
+          ls -la
 
       - name: List .next Directory
-        run: ls -la .next
+        run: |
+          echo "Listing .next directory"
+          ls -la .next
 
       - name: Verify Output Directory
-        run: ls -la ./out || echo "Directory ./out does not exist"
+        run: |
+          echo "Verifying ./out directory"
+          ls -la ./out || echo "Directory ./out does not exist"
 
       - name: Upload artifact 📡
         uses: actions/upload-pages-artifact@v3
